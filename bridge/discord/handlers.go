@@ -146,32 +146,35 @@ func (b *Bdiscord) messageCreate(s *discordgo.Session, m *discordgo.MessageCreat
 	if len(m.Attachments) > 0 {
 		first := true
 		for _, attach := range m.Attachments {
-			// m.Content = m.Content + "\n" + attach.URL
-			var url, name, caption string
+			if b.alwaysDownloadFiles {
+				var url, name, caption string
 
-			url = attach.URL
-			name = attach.Filename
+				url = attach.URL
+				name = attach.Filename
 
-			err := helper.HandleDownloadSize(b.Log, &rmsg, name, int64(attach.Size), b.General)
-			if err != nil {
-				return
-			}
-			data, err := helper.DownloadFile(url)
-			if err != nil {
-				return
-			}
-
-			if first {
-				caption = m.Content
-				if caption == "" {
-					caption = name
+				err := helper.HandleDownloadSize(b.Log, &rmsg, name, int64(attach.Size), b.General)
+				if err != nil {
+					return
 				}
-				first = false
-			} else {
-				caption = ""
-			}
+				data, err := helper.DownloadFile(url)
+				if err != nil {
+					return
+				}
 
-			helper.HandleDownloadData(b.Log, &rmsg, name, caption, "", data, b.General)
+				if first {
+					caption = m.Content
+					if caption == "" {
+						caption = name
+					}
+					first = false
+				} else {
+					caption = ""
+				}
+
+				helper.HandleDownloadData(b.Log, &rmsg, name, caption, "", data, b.General)
+			} else {
+				m.Content = m.Content + "\n" + attach.URL
+			}
 		}
 	}
 
