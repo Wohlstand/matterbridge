@@ -61,6 +61,7 @@ func (b *Btelegram) Connect() error {
 
 		b.c, err = tgbotapi.NewBotAPIWithClient(b.GetString("Token"), tgbotapi.APIEndpoint, client)
 	} else {
+		b.Log.Infof("Workg without HTTP proxy to connect Telegram API")
 		b.c, err = tgbotapi.NewBotAPI(b.GetString("Token"))
 	}
 
