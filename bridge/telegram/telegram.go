@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"html"
 	"log"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
 	"github.com/matterbridge-org/matterbridge/bridge"
 	"github.com/matterbridge-org/matterbridge/bridge/config"
 	"github.com/matterbridge-org/matterbridge/bridge/helper"
+
 	// Seems not much different from upstream https://github.com/go-telegram-bot-api/telegram-bot-api replace?
 	tgbotapi "github.com/matterbridge/telegram-bot-api/v6"
 )
@@ -43,12 +46,29 @@ func New(cfg *bridge.Config) bridge.Bridger {
 
 func (b *Btelegram) Connect() error {
 	var err error
+
 	b.Log.Info("Connecting")
-	b.c, err = tgbotapi.NewBotAPI(b.GetString("Token"))
+
+	http_proxy := b.GetString("http_proxy")
+	if http_proxy != "" {
+		b.Log.Infof("Using HTTP proxy %s to connect Telegram API", http_proxy)
+		// This cannot fail because when the URL is invalid, `NewHttpClient` (bridge.go)
+		// produces an error  which is caught by `AddBridge` (gateway.go), and this
+		// point in code is never reached.
+		proxyURL, _ := url.Parse(http_proxy)
+		// Implemented the use of proxy hinted here: https://github.com/bwmarrin/discordgo/issues/852
+		client := &http.Client{Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)}}
+
+		b.c, err = tgbotapi.NewBotAPIWithClient(b.GetString("Token"), tgbotapi.APIEndpoint, client)
+	} else {
+		b.c, err = tgbotapi.NewBotAPI(b.GetString("Token"))
+	}
+
 	if err != nil {
 		b.Log.Debugf("%#v", err)
 		return err
 	}
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 	updates := b.c.GetUpdatesChan(u)
