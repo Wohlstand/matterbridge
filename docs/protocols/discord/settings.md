@@ -123,7 +123,6 @@ This feature requires the "Manage Webhooks" permission (either globally or as pe
 Setting: OPTIONAL \
 Format: boolean \
 Example:
-
   ```toml
   AutoWebhooks=true
   ```
@@ -162,4 +161,19 @@ TODO: does this cut graphemes or bytes?
 - Example:
   ```toml
   QuoteLengthLimit=46
+  ```
+
+## http_proxy
+
+> [!INFO]
+> This setting can also be set application-wide, see [../../settings.md#http_proxy].
+
+Specify the HTTP proxy to connect to the Discord API, and to download HTTP
+attachments received from Discord.
+
+- Setting: **OPTIONAL**
+- Format: *string*
+- Example:
+  ```toml
+  http_proxy="http://login:password@server.example.org:1234"
   ```
