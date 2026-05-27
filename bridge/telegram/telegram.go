@@ -167,6 +167,10 @@ func (b *Btelegram) Send(msg config.Message) (string, error) {
 		msg.Text = fmt.Sprintf("[reply]: %s", msg.Text)
 	}
 
+	if strings.HasSuffix(msg.Text, "*") || strings.HasSuffix(msg.Text, "_") {
+		msg.Text += "\n[attachments]"
+	}
+
 	var parentID int
 	if msg.ParentID != "" {
 		parentID, _ = b.intParentID(msg.ParentID)
