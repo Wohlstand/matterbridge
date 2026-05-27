@@ -7,6 +7,7 @@ import (
 	"image/png"
 	"io"
 	"net/http"
+	"net/url"
 	"regexp"
 	"strings"
 	"time"
@@ -32,13 +33,31 @@ func DownloadFile(url string) (*[]byte, error) {
 	return DownloadFileAuth(url, "")
 }
 
-// DownloadFileAuth downloads the given URL using the specified authentication token.
+func DownloadFileProxy(url string, http_proxy string) (*[]byte, error) {
+	return DownloadFileAuthProxy(url, "", http_proxy)
+}
+
 func DownloadFileAuth(url string, auth string) (*[]byte, error) {
+	return DownloadFileAuthProxy(url, "", "")
+}
+
+// DownloadFileAuth downloads the given URL using the specified authentication token.
+func DownloadFileAuthProxy(url_addr string, auth string, http_proxy string) (*[]byte, error) {
 	var buf bytes.Buffer
-	client := &http.Client{
-		Timeout: time.Second * 5,
+	var client *http.Client
+
+	if http_proxy != "" {
+		proxyURL, _ := url.Parse(http_proxy)
+		client = &http.Client{
+			Timeout:   time.Second * 5,
+			Transport: &http.Transport{Proxy: http.ProxyURL(proxyURL)},
+		}
+	} else {
+		client = &http.Client{
+			Timeout: time.Second * 5,
+		}
 	}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", url_addr, nil)
 	if auth != "" {
 		req.Header.Add("Authorization", auth)
 	}
@@ -51,7 +70,7 @@ func DownloadFileAuth(url string, auth string) (*[]byte, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, HttpGetNotOkError(url, resp.StatusCode)
+		return nil, HttpGetNotOkError(url_addr, resp.StatusCode)
 	}
 
 	_, err = io.Copy(&buf, resp.Body)

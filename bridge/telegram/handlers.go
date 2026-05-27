@@ -426,7 +426,8 @@ func (b *Btelegram) handleDownload(rmsg *config.Message, message *tgbotapi.Messa
 	if err != nil {
 		return err
 	}
-	data, err := helper.DownloadFile(url)
+
+	data, err := helper.DownloadFileProxy(url, b.GetString("http_proxy"))
 	if err != nil {
 		return err
 	}
