@@ -152,6 +152,10 @@ func (b *Btelegram) Send(msg config.Message) (string, error) {
 		return b.cacheAvatar(&msg)
 	}
 
+	if strings.HasSuffix(msg.Text, "*") || strings.HasSuffix(msg.Text, "_") {
+		msg.Text += "\n[attachments]"
+	}
+
 	if b.GetString("MessageFormat") == HTMLFormat {
 		msg.Text = makeHTML(html.EscapeString(msg.Text))
 	}
@@ -165,10 +169,6 @@ func (b *Btelegram) Send(msg config.Message) (string, error) {
 	if msg.ParentNotFound() {
 		msg.ParentID = ""
 		msg.Text = fmt.Sprintf("[reply]: %s", msg.Text)
-	}
-
-	if strings.HasSuffix(msg.Text, "*") || strings.HasSuffix(msg.Text, "_") {
-		msg.Text += "\n[attachments]"
 	}
 
 	var parentID int
