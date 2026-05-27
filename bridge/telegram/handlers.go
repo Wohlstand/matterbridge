@@ -564,6 +564,10 @@ func (b *Btelegram) handleUploadFile(msg *config.Message, chatid int64, threadid
 
 		if b.GetString("MessageFormat") == HTMLFormat {
 			fi.Comment = makeHTML(html.EscapeString(fi.Comment))
+		} else if b.GetString("MessageFormat") == "Markdown" {
+			if fi.Name == fi.Comment {
+				fi.Comment = "`" + fi.Comment + "`"
+			}
 		}
 
 		if !equal {
