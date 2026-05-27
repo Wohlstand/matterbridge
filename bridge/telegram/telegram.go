@@ -152,10 +152,6 @@ func (b *Btelegram) Send(msg config.Message) (string, error) {
 		return b.cacheAvatar(&msg)
 	}
 
-	if strings.HasSuffix(msg.Text, "*") || strings.HasSuffix(msg.Text, "_") || strings.HasSuffix(msg.Text, "\n") {
-		msg.Text += "\n[attachments]"
-	}
-
 	if b.GetString("MessageFormat") == HTMLFormat {
 		msg.Text = makeHTML(html.EscapeString(msg.Text))
 	}
