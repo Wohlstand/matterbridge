@@ -343,7 +343,7 @@ func (b *Btelegram) handleDownloadAvatar(userid int64, channel string) {
 			b.Log.Error(err)
 			return
 		}
-		data, err := helper.DownloadFile(url)
+		data, err := helper.DownloadFileProxy(url, b.GetString("http_proxy"))
 		if err != nil {
 			b.Log.Errorf("download %s failed %#v", url, err)
 			return
